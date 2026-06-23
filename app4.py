@@ -1,25 +1,47 @@
 import streamlit as st
+import numpy as np
+import matplotlib.pyplot as plt
 
-st.set_page_config(page_title="Logika Fuzzy", page_icon="🧠")
+st.set_page_config(
+    page_title="Sistem Logika Fuzzy",
+    page_icon="🧠",
+    layout="wide"
+)
 
-st.title("🧠 Sistem Logika Fuzzy")
-st.write("Pilih salah satu studi kasus berikut:")
+st.title("🧠 TUGAS PRAKTIKUM LOGIKA FUZZY")
+st.write("Pilih salah satu studi kasus pada menu sidebar.")
 
+# Fungsi menampilkan grafik
+def tampilkan_grafik(x, y1, y2, y3, label1, label2, label3, judul):
+    fig, ax = plt.subplots(figsize=(8, 4))
+
+    ax.plot(x, y1, label=label1, linewidth=2)
+    ax.plot(x, y2, label=label2, linewidth=2)
+    ax.plot(x, y3, label=label3, linewidth=2)
+
+    ax.set_title(judul)
+    ax.set_ylabel("μ(x)")
+    ax.grid(True)
+    ax.legend()
+
+    st.pyplot(fig)
+
+# Sidebar
 menu = st.sidebar.selectbox(
     "Pilih Kasus",
     [
-        "Penilaian Mahasiswa",
-        "Kelayakan Beasiswa",
-        "Tingkat Kemacetan"
+        "Kasus 1 - Penilaian Mahasiswa",
+        "Kasus 2 - Kelayakan Beasiswa",
+        "Kasus 3 - Tingkat Kemacetan"
     ]
 )
 
-# ==========================
+# ==================================================
 # KASUS 1
-# ==========================
-if menu == "Penilaian Mahasiswa":
+# ==================================================
+if menu == "Kasus 1 - Penilaian Mahasiswa":
 
-    st.header("Kasus 1 - Penilaian Mahasiswa")
+    st.header("📚 Penilaian Mahasiswa")
 
     nilai = st.slider("Nilai Ujian", 0, 100, 50)
 
@@ -49,23 +71,39 @@ if menu == "Penilaian Mahasiswa":
     t = tinggi(nilai)
 
     st.subheader("Derajat Keanggotaan")
-    st.write("Rendah :", round(r, 2))
-    st.write("Sedang :", round(s, 2))
-    st.write("Tinggi :", round(t, 2))
+
+    col1, col2, col3 = st.columns(3)
+
+    col1.metric("Rendah", round(r, 2))
+    col2.metric("Sedang", round(s, 2))
+    col3.metric("Tinggi", round(t, 2))
 
     hasil = max(
         {"Rendah": r, "Sedang": s, "Tinggi": t},
-        key=lambda k: {"Rendah": r, "Sedang": s, "Tinggi": t}[k]
+        key=lambda x: {"Rendah": r, "Sedang": s, "Tinggi": t}[x]
     )
 
     st.success(f"Hasil Penilaian: {hasil}")
 
-# ==========================
-# KASUS 2
-# ==========================
-elif menu == "Kelayakan Beasiswa":
+    x = np.arange(0, 101, 1)
 
-    st.header("Kasus 2 - Kelayakan Beasiswa")
+    tampilkan_grafik(
+        x,
+        [rendah(i) for i in x],
+        [sedang(i) for i in x],
+        [tinggi(i) for i in x],
+        "Rendah",
+        "Sedang",
+        "Tinggi",
+        "Grafik Fungsi Keanggotaan Nilai Mahasiswa"
+    )
+
+# ==================================================
+# KASUS 2
+# ==================================================
+elif menu == "Kasus 2 - Kelayakan Beasiswa":
+
+    st.header("🎓 Kelayakan Beasiswa")
 
     ipk = st.slider("IPK", 0.0, 4.0, 2.5, 0.01)
 
@@ -73,19 +111,19 @@ elif menu == "Kelayakan Beasiswa":
         if x <= 1.5:
             return 1
         elif x < 2.5:
-            return (2.5 - x)
+            return (2.5 - x) / (2.5 - 1.5)
         return 0
 
     def dipertimbangkan(x):
         if 1.5 < x < 2.5:
-            return (x - 1.5)
+            return (x - 1.5) / (2.5 - 1.5)
         elif 2.5 <= x < 3.5:
-            return (3.5 - x)
+            return (3.5 - x) / (3.5 - 2.5)
         return 0
 
     def layak(x):
         if 2.5 < x < 3.5:
-            return (x - 2.5)
+            return (x - 2.5) / (3.5 - 2.5)
         elif x >= 3.5:
             return 1
         return 0
@@ -95,29 +133,47 @@ elif menu == "Kelayakan Beasiswa":
     ly = layak(ipk)
 
     st.subheader("Derajat Keanggotaan")
-    st.write("Tidak Layak :", round(tl, 2))
-    st.write("Dipertimbangkan :", round(dp, 2))
-    st.write("Layak :", round(ly, 2))
+
+    col1, col2, col3 = st.columns(3)
+
+    col1.metric("Tidak Layak", round(tl, 2))
+    col2.metric("Dipertimbangkan", round(dp, 2))
+    col3.metric("Layak", round(ly, 2))
 
     hasil = max(
-        {"Tidak Layak": tl,
-         "Dipertimbangkan": dp,
-         "Layak": ly},
-        key=lambda k: {
+        {
             "Tidak Layak": tl,
             "Dipertimbangkan": dp,
             "Layak": ly
-        }[k]
+        },
+        key=lambda x: {
+            "Tidak Layak": tl,
+            "Dipertimbangkan": dp,
+            "Layak": ly
+        }[x]
     )
 
     st.success(f"Hasil Evaluasi: {hasil}")
 
-# ==========================
-# KASUS 3
-# ==========================
-elif menu == "Tingkat Kemacetan":
+    x = np.arange(0, 4.01, 0.01)
 
-    st.header("Kasus 3 - Tingkat Kemacetan")
+    tampilkan_grafik(
+        x,
+        [tidak_layak(i) for i in x],
+        [dipertimbangkan(i) for i in x],
+        [layak(i) for i in x],
+        "Tidak Layak",
+        "Dipertimbangkan",
+        "Layak",
+        "Grafik Fungsi Keanggotaan Beasiswa"
+    )
+
+# ==================================================
+# KASUS 3
+# ==================================================
+else:
+
+    st.header("🚦 Tingkat Kemacetan")
 
     kendaraan = st.slider("Jumlah Kendaraan", 0, 1000, 500)
 
@@ -147,19 +203,29 @@ elif menu == "Tingkat Kemacetan":
     m = macet(kendaraan)
 
     st.subheader("Derajat Keanggotaan")
-    st.write("Lancar :", round(l, 2))
-    st.write("Padat :", round(p, 2))
-    st.write("Macet :", round(m, 2))
+
+    col1, col2, col3 = st.columns(3)
+
+    col1.metric("Lancar", round(l, 2))
+    col2.metric("Padat", round(p, 2))
+    col3.metric("Macet", round(m, 2))
 
     hasil = max(
-        {"Lancar": l,
-         "Padat": p,
-         "Macet": m},
-        key=lambda k: {
-            "Lancar": l,
-            "Padat": p,
-            "Macet": m
-        }[k]
+        {"Lancar": l, "Padat": p, "Macet": m},
+        key=lambda x: {"Lancar": l, "Padat": p, "Macet": m}[x]
     )
 
     st.success(f"Tingkat Kemacetan: {hasil}")
+
+    x = np.arange(0, 1001, 1)
+
+    tampilkan_grafik(
+        x,
+        [lancar(i) for i in x],
+        [padat(i) for i in x],
+        [macet(i) for i in x],
+        "Lancar",
+        "Padat",
+        "Macet",
+        "Grafik Fungsi Keanggotaan Kemacetan"
+    )
